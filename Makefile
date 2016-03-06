@@ -1,9 +1,9 @@
 OPTIMIZE=-O2
 CC = gcc
 CFLAGS = $(OPTIMIZE) -g3 -std=gnu11
-DEPS = sltest.h SortedList.h
-OBJ = main.o sltest.o SortedList.o
-SOURCES = Makefile sltest.c sltest.h main.c SortedList.h SortedList.c
+DEPS = sltest.h SortedList.h parser.h
+OBJ = main.o sltest.o SortedList.o parser.o
+SOURCES = Makefile sltest.c sltest.h main.c SortedList.h SortedList.c parser.h parser.c
 
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
