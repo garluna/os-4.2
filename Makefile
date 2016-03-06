@@ -1,0 +1,28 @@
+OPTIMIZE=-O2
+CC = gcc
+CFLAGS = $(OPTIMIZE) -g3 -std=gnu11
+DEPS = sltest.h SortedList.h
+OBJ = main.o sltest.o
+SOURCES = Makefile sltest.c sltest.h main.c SortedList.h
+
+%.o: %.c $(DEPS)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+sltest: $(OBJ)
+	gcc $(CFLAGS) -o $@ $^
+
+
+check:
+	
+
+dist: lab4.2-GarimaLunawatBreannaNery.tar.gz
+lab4.2-GarimaLunawatBreannaNery.tar.gz: $(SOURCES)
+	mkdir lab4.2-GarimaLunawatBreannaNery
+	cp $(SOURCES) lab4.2-GarimaLunawatBreannaNery
+	tar -czf $@ lab4.2-GarimaLunawatBreannaNery
+	rm -r lab4.2-GarimaLunawatBreannaNery
+
+clean:
+	rm -f *.o *.so *.so.* sltest lab4.2-GarimaLunawatBreannaNery.tar.gz lab4.2-GarimaLunawatBreannaNery
+
+
