@@ -34,10 +34,6 @@
  	n->prev = element;
  }
 
- int SortedList_delete(SortedListElement_t *element)
- {
- 	return 0;
- }	
 
  SortedListElement_t* SortedList_lookup(SortedList_t *list, const char *key)
  {
@@ -52,6 +48,22 @@
  	return NULL; // Unable to find element 
  }
 
+ int SortedList_delete(SortedListElement_t *element)
+ {
+ 	SortedListElement_t *p = element->prev;
+ 	SortedListElement_t *n = element->next;
+
+ 	if(p->next != element || n->prev != element)
+ 		return 1;
+
+ 	n->prev = p; 
+ 	p->next = n; 
+
+ 	element->next = NULL;
+ 	element->prev = NULL;
+ 	return 0;
+ }	
+
  int SortedList_length(SortedList_t *list)
  {
  	int counter = 0;
@@ -60,6 +72,7 @@
 
  	while (n != list)
  	{
+ 		// Check for pointer corruption 
  		if (n->prev != p)
  			return -1; 
  		if (p->next != n)
