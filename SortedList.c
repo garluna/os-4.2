@@ -1,4 +1,7 @@
 #include <string.h>
+#include <pthread.h>
+#define _GNU_SOURCE
+
 #include "SortedList.h"
 /*
  * SortedList (and SortedListElement)
@@ -27,6 +30,9 @@
  		n = n->next;
  	}
 
+ 	// OPT_YIELD
+ 	if(opt_yield & INSERT_YIELD)
+ 		pthread_yield();
  	// Perform the insertion 
  	element->prev = p;
  	element->next = n;
@@ -40,6 +46,8 @@
  	SortedListElement_t *iter = list->next; // Initialized at first element
  	while(iter != list)
  	{
+ 		if (opt_yield & SEARCH_YIELD)
+ 			pthread_yield();
  		if(strcmp(iter->key, key) == 0) // Found Element
  			return iter;
 
@@ -58,6 +66,10 @@
 
  	n->prev = p; 
  	p->next = n; 
+
+ 	// OPT_YIELD
+ 	if(opt_yield & DELETE_YIELD)
+ 		pthread_yield();
 
  	element->next = NULL;
  	element->prev = NULL;
@@ -78,6 +90,9 @@
  		if (p->next != n)
  			return -1; 
 
+ 		// OPT_YIELD
+ 		if(opt_yield & SEARCH_YIELD)
+ 			pthread_yield();
  		counter++;
  		p = n;
  		n = n->next;

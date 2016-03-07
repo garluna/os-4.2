@@ -7,9 +7,13 @@
 #include "sltest.h"
 
 /** GLOBALS **/ 
-int num_threads = 1;
+int num_threads = 1; // Default 1 thread
 int num_iterations = 1;
 int num_lists = 1;
+int use_mutex = 0;
+int use_spinlock = 0; 
+static char* mutex_key;
+static char* spinlock_key;
 
 int character_to_int(char* c)
 {
@@ -74,7 +78,21 @@ int parse(int argc, char** argv)
 				break;
 
 			case SYNC: 
-				printf("Sync! With argument of %s \n", optarg);
+				if(strcmp(optarg,mutex_key) == 0)
+				{
+					use_mutex = 1;
+					printf("Use pthread_mutex \n");
+				}
+				else if(strcmp(optarg, spinlock_key) == 0)
+				{
+					use_spinlock = 1;
+					printf("Use spinlocks! \n");
+				}
+				else // Invalid option
+				{
+					fprintf(stderr, "ERROR: %s is an invalid option! Use m for mutexes or s for spinlocks \n", optarg);
+					return 1; 
+				}
 				break;
 
 			case '?': // Unknown option or missing arg to option

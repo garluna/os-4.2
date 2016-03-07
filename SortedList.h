@@ -1,5 +1,6 @@
 #ifndef SORTEDLIST_H
 #define SORTEDLIST_H
+#include <pthread.h>
 /*
  * SortedList (and SortedListElement)
  *
