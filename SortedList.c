@@ -3,6 +3,8 @@
 #define _GNU_SOURCE
 
 #include "SortedList.h"
+
+int opt_yield;
 /*
  * SortedList (and SortedListElement)
  *
