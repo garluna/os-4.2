@@ -22,6 +22,7 @@ static struct option parameters[] =
 	{"yield",		required_argument, 0, YIELD      },
 	{"sync",		required_argument, 0, SYNC       }
 };
+
 /**
  * parse ... parse command line options
  *
@@ -32,4 +33,12 @@ static struct option parameters[] =
  */
 int parse(int argc, char** argv);
 
+/**
+* char_to_int ... converts char to int using strtoll
+* 
+* @param char* c ... string to be converted
+*
+* @return converted integer; -1 if the conversion is not a digit
+*/ 
+int character_to_int(char* c);
 #endif 

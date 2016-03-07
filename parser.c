@@ -1,15 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <string.h>
 
 #include "parser.h"
+#include "sltest.h"
+
+/** GLOBALS **/ 
+int num_threads = 1;
+int num_iterations = 1;
+int num_lists = 1;
+
+int character_to_int(char* c)
+{
+	int val; 
+	char* end; 
+
+	val = strtoll(c,&end,0);
+	if(end == c) // Argument is not a digit
+	{
+		return -1;
+	}
+
+	return val;
+}
 
 int parse(int argc, char** argv)
 {
 	int c; // Argument code returned by getoptlong
 	int option_index = 0; // Option index
 	int loop = 1; 
-
+	
 	while(loop)
 	{
 		c = getopt_long (argc, argv, "", parameters, &option_index);
@@ -19,19 +40,37 @@ int parse(int argc, char** argv)
 		switch(c)
 		{
 			case THREADS:
-				printf("Threads! With an optional argument of %s \n", optarg);
+				num_threads = character_to_int(optarg);
+				if (num_threads == -1)
+				{
+					fprintf(stderr, "ERROR: Argument is not a digit!");
+					return 1;
+				}
+				printf("The number of threads is %d \n", num_threads);
 				break;
 
 			case ITERATIONS:
-				printf("Iterations! With an optional argument of %s \n", optarg);
+				num_iterations = character_to_int(optarg);
+				if (num_iterations == -1)
+				{
+					fprintf(stderr, "ERROR: Argument is not a digit!");
+					return 1;
+				}	
+				printf("The number of Iterations is %d \n", num_iterations);			
 				break;
 
 			case LISTS:
-				printf("Iterations! With an optional argument of %s \n", optarg);
+				num_lists = character_to_int(optarg);
+				if (num_lists == -1)
+				{
+					fprintf(stderr, "ERROR: Argument is not a digit!");
+					return 1;
+				}	
+				printf("The number of lists is %d \n", num_lists);	
 				break;
 
 			case YIELD:
-				printf("Yield! With argument of %s \n", optarg);
+				
 				break;
 
 			case SYNC: 
