@@ -3,6 +3,7 @@
 
 #include "SortedList.h"
 #include "parser.h"
+#include "sltest.h"
 
 /** GLOBALS **/ 
 int num_threads; // Default 1 thread
@@ -19,5 +20,17 @@ int main(int argc, char** argv)
 {
 	int returnStatus = parse(argc,argv);
 	
+	head = initialize_list(head);
+	int size = SortedList_length(head);
+	printf("The size of the initialized list is %i \n", size);
+
+	SortedListElement_t* elem1 = initialize_element(elem1);
+	SortedListElement_t* elem2 = initialize_element(elem2);
+	SortedList_insert(head,elem1);
+	SortedList_insert(head,elem2);
+	size = SortedList_length(head);
+	printf("The size of the initialized list is %i \n", size);
+
+	terminate();
 	return returnStatus;
 }
