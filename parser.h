@@ -41,4 +41,13 @@ int parse(int argc, char** argv);
 * @return converted integer; -1 if the conversion is not a digit
 */ 
 int character_to_int(char* c);
+
+/**
+* parse_yield ... parses yield argument and sets yield variables to true
+* 
+* @param char* c ... argument passed to --yield
+*
+* @return 0 yield variables set; -1 invalid argument (non "ids" characters)
+*/ 
+int parse_yield(char* arg);
 #endif 

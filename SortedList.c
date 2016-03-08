@@ -4,7 +4,16 @@
 
 #include "SortedList.h"
 
-int opt_yield;
+#if defined(__APPLE__) || defined(__MACH__) 
+#define pthread_yield() pthread_yield_np()
+#endif
+
+/** GLOBALS **/ 
+int insert_yield; // Default 0 (false)
+int delete_yield; // Default 0 (false)
+int search_yield; // Default 0 (false)
+
+int opt_yield = 0;
 /*
  * SortedList (and SortedListElement)
  *
@@ -33,6 +42,8 @@ int opt_yield;
  	}
 
  	// OPT_YIELD
+ 	if(insert_yield)
+ 		opt_yield = INSERT_YIELD;
  	if(opt_yield & INSERT_YIELD)
  		pthread_yield();
  	// Perform the insertion 
@@ -48,6 +59,8 @@ int opt_yield;
  	SortedListElement_t *iter = list->next; // Initialized at first element
  	while(iter != list)
  	{
+ 		if (search_yield)
+ 			opt_yield = SEARCH_YIELD;
  		if (opt_yield & SEARCH_YIELD)
  			pthread_yield();
  		if(strcmp(iter->key, key) == 0) // Found Element
@@ -70,6 +83,8 @@ int opt_yield;
  	p->next = n; 
 
  	// OPT_YIELD
+ 	if(delete_yield)
+ 		opt_yield = DELETE_YIELD;
  	if(opt_yield & DELETE_YIELD)
  		pthread_yield();
 
@@ -93,6 +108,8 @@ int opt_yield;
  			return -1; 
 
  		// OPT_YIELD
+ 		if(search_yield)
+ 			opt_yield = SEARCH_YIELD;
  		if(opt_yield & SEARCH_YIELD)
  			pthread_yield();
  		counter++;

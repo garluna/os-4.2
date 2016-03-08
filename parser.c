@@ -14,6 +14,9 @@ int use_mutex = 0;
 int use_spinlock = 0; 
 static char* mutex_key;
 static char* spinlock_key;
+int insert_yield; // Default 0 (false)
+int delete_yield; // Default 0 (false)
+int search_yield; // Default 0 (false)
 
 int character_to_int(char* c)
 {
@@ -27,6 +30,35 @@ int character_to_int(char* c)
 	}
 
 	return val;
+}
+
+int parse_yield(char* arg)
+{
+	int i;
+	for(i=0; i < strlen(arg); i++)
+	{
+		switch(arg[i])
+		{
+			case 'i':
+				insert_yield = 1; 
+				break;
+
+			case 'd':
+				delete_yield = 1;
+				break;
+
+			case 's':
+				search_yield = 1;
+				break;
+
+			case '\0':
+				break;
+
+			default: // Argument contains a character that is not i, d, or s
+				return -1; 
+		}
+	}
+	return 0;
 }
 
 int parse(int argc, char** argv)
@@ -74,7 +106,11 @@ int parse(int argc, char** argv)
 				break;
 
 			case YIELD:
-				
+				if(parse_yield(optarg) == -1)
+				{
+					fprintf(stderr, "ERROR: Argument is not [ids]");
+					return 1;
+				}
 				break;
 
 			case SYNC: 
