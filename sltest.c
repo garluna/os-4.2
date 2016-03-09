@@ -50,14 +50,18 @@ void* list_func(void* iter)
 	int i; 
 	const char* keys[num_iter];
 	SortedListElement_t* ret_elem;
-	
+	printf("Everything good before insert\n");
 	// Insert (iteration) elements at random
 	for(i = 0; i < num_iter; i++)
 	{
 		if(num_elements > 1)
 			rand_index = rand() % (num_elements - 1); // 0 - (num_elements-1)
+
+		printf("Inserting element at index %i \n", rand_index);
 		SortedList_insert(head, elem_array[rand_index]);
+		printf("After insert for iteration %i \n", i);
 		keys[i] = elem_array[rand_index]->key; 
+		printf("the key is %s \n", keys[i]);
 	}
 	
 	// Find each inserted element, then delete it
