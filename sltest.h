@@ -32,4 +32,5 @@ SortedList_t* initialize_list(SortedList_t* head);
 SortedListElement_t* initialize_element(SortedListElement_t* element);
 char* generate_key();
 void terminate();
+void* list_func(void* iter);
 #endif

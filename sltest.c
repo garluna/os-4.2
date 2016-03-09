@@ -43,6 +43,38 @@ SortedListElement_t* initialize_element(SortedListElement_t* element)
 	return element;
 }
 
+void* list_func(void* iter)
+{
+	int num_iter = (int) iter;
+	int rand_index;  
+	int i; 
+	const char* keys[num_iter];
+	SortedListElement_t* ret_elem;
+	int ret_delete; 
+	
+	// Insert (iteration) elements at random
+	for(i = 0; i < num_iter; i++)
+	{
+		rand_index = rand() % (num_elements - 1); // 0 - (num_elements-1)
+		SortedList_insert(head, elem_array[rand_index]);
+		keys[i] = elem_array[rand_index]->key; 
+	}
+	
+	// Find each inserted element, then delete it
+	for(i = 0; i < num_iter; i++)
+	{
+		ret_elem = SortedList_lookup(head, keys[i]);
+		if(ret_elem == NULL)
+			fprintf(stderr, "ERROR: A thread failed to find an element it inserted \n");
+		
+		if(SortedList_delete(ret_elem) == 1) 
+			fprintf(stderr, "ERROR: Corrupted pointers in delete attempt");	
+	}
+
+	pthread_exit(NULL);
+}
+
+
 void terminate()
 {
 	int i;

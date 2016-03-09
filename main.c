@@ -21,7 +21,7 @@ int search_yield; // Default 0 (false)
 SortedList_t *head;
 SortedListElement_t** elem_array;
 int num_elements;
-extern pthread_t* threads;
+pthread_t* threads;
 
 int main(int argc, char** argv)
 {
@@ -79,7 +79,16 @@ int main(int argc, char** argv)
 		fprintf(stderr,"ERROR: Unable to malloc the threads array");
 		return returnStatus;
 	}
-
+	
+	for(i = 0; i < num_threads; i++)
+	{
+		if (pthread_create(&threads[i], NULL, (void*) list_func, (void*)&num_iterations) != 0)
+		{
+			returnStatus = 1;
+			fprintf(stderr, "ERROR: Unable to create a thread \n");
+			return returnStatus;
+		}
+	}
 
 	if (clock_gettime(CLOCK_MONOTONIC, &end) != 0)
 	{
