@@ -22,7 +22,9 @@ static char* mutex_key = "m";
 static char* spinlock_key = "s";
 
 // SORTED LIST
-SortedList_t *head; 
+extern SortedList_t *head; // Head of list
+extern SortedListElement_t** elem_array; // Pointer to SortedListElement* array 
+extern int num_elements;
 
 SortedList_t* initialize_list(SortedList_t* head);
 SortedListElement_t* initialize_element(SortedListElement_t* element);

@@ -45,5 +45,13 @@ SortedListElement_t* initialize_element(SortedListElement_t* element)
 
 void terminate()
 {
+	int i;
 	free(head);
+	for(i = 0; i < num_elements; i++)
+	{
+		if(elem_array[i] != NULL) 
+			free(elem_array[i]);
+	}
+	free(elem_array);
+
 }
