@@ -46,7 +46,7 @@ SortedListElement_t* initialize_element(SortedListElement_t* element)
 void* list_func(void* iter)
 {
 	int num_iter = (int) iter;
-	int rand_index;  
+	int rand_index = 0;
 	int i; 
 	const char* keys[num_iter];
 	SortedListElement_t* ret_elem;
@@ -54,7 +54,8 @@ void* list_func(void* iter)
 	// Insert (iteration) elements at random
 	for(i = 0; i < num_iter; i++)
 	{
-		rand_index = rand() % (num_elements - 1); // 0 - (num_elements-1)
+		if(num_elements > 1)
+			rand_index = rand() % (num_elements - 1); // 0 - (num_elements-1)
 		SortedList_insert(head, elem_array[rand_index]);
 		keys[i] = elem_array[rand_index]->key; 
 	}

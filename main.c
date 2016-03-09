@@ -27,6 +27,7 @@ int main(int argc, char** argv)
 {
 	int returnStatus;
 	int i; // iterator variable
+	int size;
 	struct timespec start;
 	struct timespec end;
 	long long startTime; 
@@ -82,7 +83,7 @@ int main(int argc, char** argv)
 	
 	for(i = 0; i < num_threads; i++)
 	{
-		if (pthread_create(&threads[i], NULL, (void*) list_func, (void*)&num_iterations) != 0)
+		if (pthread_create(&threads[i], NULL, (void*) list_func, (void*)num_iterations) != 0)
 		{
 			returnStatus = 1;
 			fprintf(stderr, "ERROR: Unable to create a thread \n");
@@ -123,7 +124,7 @@ int main(int argc, char** argv)
 	{
 		SortedList_insert(head,elem_array[i]);
 	}
-
+	
 	size = SortedList_length(head);
 	printf("The size of the initialized list is now %i \n", size); // SANITY CHECK
 	*/
