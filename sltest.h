@@ -21,7 +21,7 @@ extern int search_yield; // Default 0 (false)
 static char* mutex_key = "m";
 static char* spinlock_key = "s";
 
-// SORTED LIST
+// SORTED LIST 
 extern SortedList_t *head; // Head of list
 extern SortedListElement_t** elem_array; // Pointer to SortedListElement* array 
 extern int num_elements;

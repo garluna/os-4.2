@@ -43,29 +43,29 @@ SortedListElement_t* initialize_element(SortedListElement_t* element)
 	return element;
 }
 
-void* list_func(void* iter)
+void* list_func(void* index)
 {
-	int num_iter = (int) iter;
-	int rand_index = 0;
+	int end_index = (int) index;
+	int elem_index = end_index - num_iterations;
 	int i; 
-	const char* keys[num_iter];
+	const char* keys[num_iterations];
 	SortedListElement_t* ret_elem;
 	// Insert (iteration) elements at random
-	for(i = 0; i < num_iter; i++)
+	elem_index++;
+	for( ; elem_index <= end_index; elem_index++)
 	{
-		if(num_elements > 1)
-			rand_index = rand() % (num_elements - 1); // 0 - (num_elements-1)
-
-		//printf("Inserting element at index %i \n", rand_index);
-		SortedList_insert(head, elem_array[rand_index]);
-		//printf("After insert for iteration %i \n", i);
-		keys[i] = elem_array[rand_index]->key; 
+		SortedList_insert(head, elem_array[elem_index]);
+		keys[i] = elem_array[elem_index]->key; 
 	}
 	
+	printf("successfully inserted elements!\n");
 	// Find each inserted element, then delete it
-	for(i = 0; i < num_iter; i++)
+	for(i = 0; i < num_iterations; i++)
 	{
 		ret_elem = SortedList_lookup(head, keys[i]);
+		printf("the returned element's key is: %s \n", ret_elem->key);
+		printf("element %i prev pointer is: %p \n",i,*(ret_elem->prev));
+		printf("element %i next pointer is: %p \n",i,*(ret_elem->next));
 		if(ret_elem == NULL)
 			fprintf(stderr, "ERROR: A thread failed to find an element it inserted \n");
 		

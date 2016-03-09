@@ -28,6 +28,8 @@ int main(int argc, char** argv)
 	int returnStatus;
 	int i; // iterator variable
 	int size;
+	int end_index; // Tracks the max index passed to each thread
+
 	struct timespec start;
 	struct timespec end;
 	long long startTime; 
@@ -53,6 +55,7 @@ int main(int argc, char** argv)
 		return returnStatus;
 	}
 	// Initialize elements in elem_array
+
 	for(i = 0; i < num_elements; i++)
 	{
 		elem_array[i] = initialize_element(elem_array[i]);
@@ -80,10 +83,11 @@ int main(int argc, char** argv)
 		fprintf(stderr,"ERROR: Unable to malloc the threads array");
 		return returnStatus;
 	}
-	
+	end_index = -1;
 	for(i = 0; i < num_threads; i++)
 	{
-		if (pthread_create(&threads[i], NULL, (void*) list_func, (void*)num_iterations) != 0)
+		end_index += num_iterations;
+		if (pthread_create(&threads[i], NULL, (void*) list_func, (void*)end_index) != 0)
 		{
 			returnStatus = 1;
 			fprintf(stderr, "ERROR: Unable to create a thread \n");

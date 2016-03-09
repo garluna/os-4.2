@@ -1,5 +1,6 @@
 #include <string.h>
 #include <pthread.h>
+#include <stdio.h>
 #define _GNU_SOURCE
 
 #include "SortedList.h"
@@ -39,6 +40,7 @@ int opt_yield = 0;
 
  		p = n;
  		n = n->next;
+ 		printf("n is: %p \n",*(n));
  	}
 
  	// OPT_YIELD
@@ -51,6 +53,8 @@ int opt_yield = 0;
  	element->next = n;
  	p->next = element;
  	n->prev = element;
+ 	printf("INSERTING: element prev pointer is: %p \n",*(element->prev));
+	printf("INSERTING: element next pointer is: %p \n",*(element->next));
  }
 
 
