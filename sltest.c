@@ -50,7 +50,6 @@ void* list_func(void* iter)
 	int i; 
 	const char* keys[num_iter];
 	SortedListElement_t* ret_elem;
-	int ret_delete; 
 	
 	// Insert (iteration) elements at random
 	for(i = 0; i < num_iter; i++)

@@ -90,6 +90,16 @@ int main(int argc, char** argv)
 		}
 	}
 
+	// Wait for all threads to complete
+	for(i = 0; i < num_threads; i++)
+	{
+		if (pthread_join(threads[i], NULL) != 0)
+		{
+			returnStatus = 1;
+			fprintf(stderr, "ERROR: Unable to join a thread \n");
+			return returnStatus;	
+		}
+	}
 	if (clock_gettime(CLOCK_MONOTONIC, &end) != 0)
 	{
 		fprintf(stderr, "ERROR: clock_gettime end time\n");
@@ -100,9 +110,10 @@ int main(int argc, char** argv)
 	endTime = (long long)(end.tv_sec*pow(10, 9) + end.tv_nsec);
 	totalTime = endTime - startTime;
 
-	//printf("elapsed time: %lld ns\n", totalTime);
+	printf("elapsed time: %lld ns\n", totalTime);
 
-
+	size = SortedList_length(head);
+	printf("The size of the  list is now %i \n", size); // SANITY CHECK
 	
 	/*
 	int size = SortedList_length(head); // SANITY CHECK
