@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#include <pthread.h>
 
 
 #include "SortedList.h"
@@ -20,6 +21,7 @@ int search_yield; // Default 0 (false)
 SortedList_t *head;
 SortedListElement_t** elem_array;
 int num_elements;
+extern pthread_t* threads;
 
 int main(int argc, char** argv)
 {
@@ -69,7 +71,15 @@ int main(int argc, char** argv)
 		return returnStatus;
 	}
 
-	/* DO THE THREAD STUFF */
+	// Create threads 
+	threads = malloc(num_threads*sizeof(pthread_t));
+	if(threads == NULL)
+	{
+		returnStatus = 1;
+		fprintf(stderr,"ERROR: Unable to malloc the threads array");
+		return returnStatus;
+	}
+
 
 	if (clock_gettime(CLOCK_MONOTONIC, &end) != 0)
 	{
@@ -81,7 +91,7 @@ int main(int argc, char** argv)
 	endTime = (long long)(end.tv_sec*pow(10, 9) + end.tv_nsec);
 	totalTime = endTime - startTime;
 
-	printf("elapsed time: %lld ns\n", totalTime);
+	//printf("elapsed time: %lld ns\n", totalTime);
 
 
 	
