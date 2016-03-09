@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+#include <time.h>
 
 
 #include "SortedList.h"
@@ -22,7 +24,13 @@ int num_elements;
 int main(int argc, char** argv)
 {
 	int returnStatus;
-	int i;
+	int i; // iterator variable
+	struct timespec start;
+	struct timespec end;
+	long long startTime; 
+	long long endTime;
+	long long totalTime;
+
 
 	// Parse command line arguments
 	returnStatus = parse(argc,argv);
@@ -52,23 +60,44 @@ int main(int argc, char** argv)
 			return returnStatus;
 		}
 	}
+
+	// BEGIN CLOCK TIME
+	if (clock_gettime(CLOCK_MONOTONIC, &start) != 0)
+	{
+		fprintf(stderr, "ERROR: clock_gettime start time\n");
+		returnStatus = 1;
+		return returnStatus;
+	}
+
+	/* DO THE THREAD STUFF */
+
+	if (clock_gettime(CLOCK_MONOTONIC, &end) != 0)
+	{
+		fprintf(stderr, "ERROR: clock_gettime end time\n");
+		exit(1);
+	}
+
+	startTime = (long long)(start.tv_sec*pow(10, 9) + start.tv_nsec);
+	endTime = (long long)(end.tv_sec*pow(10, 9) + end.tv_nsec);
+	totalTime = endTime - startTime;
+
+	printf("elapsed time: %lld ns\n", totalTime);
+
+
 	
-	int size = SortedList_length(head);
+	/*
+	int size = SortedList_length(head); // SANITY CHECK
 	printf("The size of the initialized list is %i \n", size);
 
 	for(i = 0; i < num_elements; i++)
 	{
 		SortedList_insert(head,elem_array[i]);
 	}
-	/*
-	SortedListElement_t* elem1 = initialize_element(elem1);
-	SortedListElement_t* elem2 = initialize_element(elem2);
-	SortedList_insert(head,elem1);
-	SortedList_insert(head,elem2);
-	*/
+
 	size = SortedList_length(head);
-	printf("The size of the initialized list is now %i \n", size);
-	
+	printf("The size of the initialized list is now %i \n", size); // SANITY CHECK
+	*/
+
 	terminate();
 	return returnStatus;
 	return 0;
