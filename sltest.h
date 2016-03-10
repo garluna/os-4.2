@@ -52,4 +52,5 @@ void acquire_mutex(sublist_t* list);
 void release_mutex(sublist_t* list);
 void acquire_lock(sublist_t* list);
 void release_lock(sublist_t*list);
+int SortedList_length_of_all_sublists();
 #endif

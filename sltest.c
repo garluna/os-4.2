@@ -7,7 +7,6 @@
 #include "SortedList.h"
 
 
-
 SortedList_t* initialize_list(SortedList_t* head_t)
 {
 	head_t = (SortedList_t*) malloc(sizeof(SortedList_t));
@@ -174,6 +173,16 @@ void* sublist_func(void* index)
 	pthread_exit(NULL);
 }
 
+int SortedList_length_of_all_sublists()
+{
+	int i; 
+	int total = 0;
+	for(i = 0; i < num_lists; i++)
+	{
+		total += SortedList_length(sublists[i].sub_head);	
+	}
+	return total; 
+}
 
 
 void terminate()
@@ -185,5 +194,10 @@ void terminate()
 		free((void*)elem_array[i].key);
 	}
 	free(elem_array);
+
+	if(num_lists > 1)
+	{
+		
+	}
 
 }

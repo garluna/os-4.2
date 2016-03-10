@@ -131,6 +131,7 @@ int main(int argc, char** argv)
 			sublists[j].lock_index = j; 
 		}
 
+		
 		// Create threads
 		end_index = -1;
 		for(i = 0; i < num_threads; i++)
@@ -143,12 +144,14 @@ int main(int argc, char** argv)
 				return returnStatus;
 			}
 		}
+		
 	}
 	else // NEG. LISTS
 	{
 		fprintf(stderr, "ERROR: Can't have a negative number of sublists! \n");
 	}
 
+	
 	// Wait for all threads to complete
 	for(i = 0; i < num_threads; i++)
 	{
@@ -159,6 +162,7 @@ int main(int argc, char** argv)
 			return returnStatus;	
 		}
 	}
+
 	if (clock_gettime(CLOCK_MONOTONIC, &end) != 0)
 	{
 		fprintf(stderr, "ERROR: clock_gettime end time\n");
@@ -172,10 +176,18 @@ int main(int argc, char** argv)
 
 
 	// Print Output:
-	size = SortedList_length(head);
-	if(size != 0)
-		fprintf(stderr, "ERROR:The size of list is %i \n", size);
-	
+	if (num_lists == 1)
+	{
+		size = SortedList_length(head);
+		if(size != 0)
+			fprintf(stderr, "ERROR:The size of list is %i \n", size);
+	}
+	else
+	{
+		size = SortedList_length_of_all_sublists();
+		if(size != 0)
+			fprintf(stderr, "ERROR:The size of all the sublists is %i \n", size);
+	}
 	printf("%d threads x %d iterations x (ins + lookup/del) x (avg len) = %d operations\n", num_threads, num_iterations, total_operations);
 	printf("elapsed time: %lld ns\n", totalTime);
 	printf("per operation: %i ns \n", totalTime/total_operations);
