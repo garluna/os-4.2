@@ -13,8 +13,14 @@
 int insert_yield; // Default 0 (false)
 int delete_yield; // Default 0 (false)
 int search_yield; // Default 0 (false)
+int use_mutex; // Default 0 (false)
+int use_spinlock; // Default 0 (false)
 
 int opt_yield = 0;
+
+// LOCKS
+static pthread_mutex_t lock_m; // mutex lock
+volatile static int lock_s; // spin lock 
 /*
  * SortedList (and SortedListElement)
  *
@@ -29,9 +35,15 @@ int opt_yield = 0;
 
  void SortedList_insert(SortedList_t *list, SortedListElement_t *element)
  {
+
+ 	if(use_mutex && !use_spinlock){
+ 		printf("USE MUTEX \n");
+ 		pthread_mutex_lock(&lock_m);
+ 	}
+
  	SortedListElement_t *p = list; // Initialized at list head
  	SortedListElement_t *n = list->next; // The first element
-
+ 	
  	// Find the right position to insert the swipe 
  	while(n != list)
  	{
@@ -39,22 +51,27 @@ int opt_yield = 0;
  			break;
 
  		p = n;
- 		n = n->next;
- 		printf("n is: %p \n",*(n));
- 	}
 
+ 		n = n->next;
+ 	
+ 	}
+ 	
  	// OPT_YIELD
  	if(insert_yield)
  		opt_yield = INSERT_YIELD;
- 	if(opt_yield & INSERT_YIELD)
+ 	if(opt_yield & INSERT_YIELD){
+ 		printf("YIELDING! \n");
  		pthread_yield();
+ 	}
  	// Perform the insertion 
  	element->prev = p;
  	element->next = n;
  	p->next = element;
  	n->prev = element;
- 	printf("INSERTING: element prev pointer is: %p \n",*(element->prev));
-	printf("INSERTING: element next pointer is: %p \n",*(element->next));
+ 	
+ 	 if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+ 		pthread_mutex_unlock(&lock_m);
+	
  }
 
 
@@ -77,6 +94,9 @@ int opt_yield = 0;
 
  int SortedList_delete(SortedListElement_t *element)
  {
+  	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+ 		pthread_mutex_lock(&lock_m);
+
  	SortedListElement_t *p = element->prev;
  	SortedListElement_t *n = element->next;
 
@@ -94,6 +114,10 @@ int opt_yield = 0;
 
  	element->next = NULL;
  	element->prev = NULL;
+
+  	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+ 		pthread_mutex_unlock(&lock_m);
+
  	return 0;
  }	
 

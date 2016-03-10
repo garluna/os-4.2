@@ -83,6 +83,7 @@ int main(int argc, char** argv)
 		fprintf(stderr,"ERROR: Unable to malloc the threads array");
 		return returnStatus;
 	}
+
 	end_index = -1;
 	for(i = 0; i < num_threads; i++)
 	{
@@ -114,12 +115,19 @@ int main(int argc, char** argv)
 	startTime = (long long)(start.tv_sec*pow(10, 9) + start.tv_nsec);
 	endTime = (long long)(end.tv_sec*pow(10, 9) + end.tv_nsec);
 	totalTime = endTime - startTime;
+	int total_operations = num_iterations*num_threads*(num_iterations*3)*4;
 
-	printf("elapsed time: %lld ns\n", totalTime);
 
+	// Print Output:
 	size = SortedList_length(head);
-	printf("The size of the  list is now %i \n", size); // SANITY CHECK
+	if(size != 0)
+		fprintf(stderr, "ERROR:The size of list is %i \n", size);
 	
+	printf("%d threads x %d iterations x (ins + lookup/del) x (100/2) = %d operations\n", num_threads, num_iterations, total_operations);
+	printf("elapsed time: %lld ns\n", totalTime);
+	printf("per operation: %i ns \n", totalTime/total_operations);
+
+
 	/*
 	int size = SortedList_length(head); // SANITY CHECK
 	printf("The size of the initialized list is %i \n", size);
@@ -135,5 +143,4 @@ int main(int argc, char** argv)
 
 	terminate();
 	return returnStatus;
-	return 0;
 }

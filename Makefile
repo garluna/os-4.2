@@ -1,4 +1,4 @@
-OPTIMIZE=-O2
+OPTIMIZE=-O0
 CC = gcc
 CFLAGS = $(OPTIMIZE) -g3 -std=gnu11  -pthread 
 DEPS = sltest.h SortedList.h parser.h

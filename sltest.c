@@ -1,20 +1,24 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #include "sltest.h"
 #include "SortedList.h"
 
-SortedList_t* initialize_list(SortedList_t* head)
+
+
+SortedList_t* initialize_list(SortedList_t* head_t)
 {
-	head = (SortedList_t*) malloc(sizeof(SortedList_t));
-	if (head == NULL)
+	head_t = (SortedList_t*) malloc(sizeof(SortedList_t));
+	if (head_t == NULL)
 		return NULL; 
 
-	head->prev = head;
-	head->next = head;
-	head->key = NULL;
+	head_t->prev = head_t;
+	head_t->next = head_t;
+	char* a = "head";
+	head_t->key = a;
 
-	return head;
+	return head_t;
 }
 
 char* generate_key()
@@ -46,26 +50,30 @@ SortedListElement_t* initialize_element(SortedListElement_t* element)
 void* list_func(void* index)
 {
 	int end_index = (int) index;
+	int i;
 	int elem_index = end_index - num_iterations;
-	int i; 
+
 	const char* keys[num_iterations];
 	SortedListElement_t* ret_elem;
 	// Insert (iteration) elements at random
 	elem_index++;
-	for( ; elem_index <= end_index; elem_index++)
+
+	for(i = 0 ; elem_index <= end_index; elem_index++)
 	{
+	
 		SortedList_insert(head, elem_array[elem_index]);
 		keys[i] = elem_array[elem_index]->key; 
+		i++;
 	}
 	
-	printf("successfully inserted elements!\n");
+	
 	// Find each inserted element, then delete it
 	for(i = 0; i < num_iterations; i++)
 	{
 		ret_elem = SortedList_lookup(head, keys[i]);
-		printf("the returned element's key is: %s \n", ret_elem->key);
-		printf("element %i prev pointer is: %p \n",i,*(ret_elem->prev));
-		printf("element %i next pointer is: %p \n",i,*(ret_elem->next));
+	
+	
+	
 		if(ret_elem == NULL)
 			fprintf(stderr, "ERROR: A thread failed to find an element it inserted \n");
 		
@@ -83,8 +91,10 @@ void terminate()
 	free(head);
 	for(i = 0; i < num_elements; i++)
 	{
-		if(elem_array[i] != NULL) 
+		if(elem_array[i] != NULL) {
+			free((void*)elem_array[i]->key);
 			free(elem_array[i]);
+		}
 	}
 	free(elem_array);
 

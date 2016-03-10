@@ -82,7 +82,6 @@ int parse(int argc, char** argv)
 					fprintf(stderr, "ERROR: Argument is not a digit!");
 					return 1;
 				}
-				printf("The number of threads is %d \n", num_threads);
 				break;
 
 			case ITERATIONS:
@@ -92,7 +91,7 @@ int parse(int argc, char** argv)
 					fprintf(stderr, "ERROR: Argument is not a digit!");
 					return 1;
 				}	
-				printf("The number of Iterations is %d \n", num_iterations);			
+				
 				break;
 
 			case LISTS:
@@ -117,12 +116,12 @@ int parse(int argc, char** argv)
 				if(strcmp(optarg,mutex_key) == 0)
 				{
 					use_mutex = 1;
-					printf("Use pthread_mutex \n");
+					
 				}
 				else if(strcmp(optarg, spinlock_key) == 0)
 				{
 					use_spinlock = 1;
-					printf("Use spinlocks! \n");
+					
 				}
 				else // Invalid option
 				{
