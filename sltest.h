@@ -44,5 +44,6 @@ SortedListElement_t* initialize_element(SortedListElement_t* element);
 char* generate_key();
 void terminate();
 void* list_func(void* iter);
-unsigned long hash_key(const char* key);
+void* sublist_func(void* index);
+int hash_key(const char* key);
 #endif

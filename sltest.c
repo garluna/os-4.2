@@ -34,7 +34,7 @@ char* generate_key()
 	return s_key;
 }
 
-unsigned long hash_key(const char* key)
+int hash_key(const char* key)
 {
 	/*
 	int key_len = strlen(key);
@@ -48,6 +48,14 @@ unsigned long hash_key(const char* key)
 
 	return sum % num_lists; 
 	*/ 
+
+	int hash = 0;
+    int c;
+
+    while (c = *key++)
+         hash = (hash + (hash >> 5)) + *(key++);
+
+    return hash % num_lists;
 
 }
 
@@ -100,6 +108,43 @@ void* list_func(void* index)
 
 	pthread_exit(NULL);
 }
+
+void* sublist_func(void* index)
+{
+	int end_index = (int) index;
+	int i;
+	int elem_index = end_index - num_iterations;
+	int sublist_index; 
+
+	SortedListElement_t* ret_elem;
+	// Insert (iteration) elements at random
+	elem_index++;
+
+	for( ; elem_index <= end_index; elem_index++)
+	{
+		sublist_index = hash_key(elem_array[elem_index]->key);
+		SortedList_insert(sublists[sublist_index].sub_head, elem_array[elem_index]);
+
+	}
+	
+	elem_index = end_index - num_iterations;
+	elem_index++;
+
+	for( ; elem_index <= end_index; elem_index++)
+	{
+		sublist_index = hash_key(elem_array[elem_index]->key);
+		ret_elem = SortedList_lookup(sublists[sublist_index].sub_head, elem_array[elem_index]->key);
+		
+		if(ret_elem == NULL)
+			fprintf(stderr, "ERROR: A thread failed to find an element it inserted \n");
+		
+		if(SortedList_delete(ret_elem) == 1) 
+			fprintf(stderr, "ERROR: Corrupted pointers in delete attempt \n");	
+	}
+	
+	pthread_exit(NULL);
+}
+
 
 
 void terminate()
