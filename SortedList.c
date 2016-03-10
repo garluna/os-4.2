@@ -19,8 +19,8 @@ int use_spinlock; // Default 0 (false)
 int opt_yield = 0;
 
 // LOCKS FOR SINGLE LIST
-static pthread_mutex_t lock_m; // mutex lock
-volatile static int lock_s; // spin lock 
+pthread_mutex_t lock_m; // mutex lock
+volatile static int lock_s = 1; // spin lock 
 
 // LOCKS FOR SUBLIST
 pthread_mutex_t* mutexes;

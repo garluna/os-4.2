@@ -25,6 +25,8 @@ SortedListElement_t** elem_array;
 int num_elements;
 pthread_t* threads;
 
+extern pthread_mutex_t lock_m;
+
 sublist_t* sublists; 
 
 pthread_mutex_t* mutexes;
@@ -59,7 +61,6 @@ int main(int argc, char** argv)
 		return returnStatus;
 	}
 	// Initialize elements in elem_array
-
 	for(i = 0; i < num_elements; i++)
 	{
 		elem_array[i] = initialize_element(elem_array[i]);
@@ -70,6 +71,10 @@ int main(int argc, char** argv)
 			return returnStatus;
 		}
 	}
+
+	// Initialize mutex lock
+	if(use_mutex)
+		pthread_mutex_init(&lock_m, NULL);
 	
 	// Create threads 
 	threads = malloc(num_threads*sizeof(pthread_t));
@@ -85,7 +90,7 @@ int main(int argc, char** argv)
 
 
 	// BEGIN CLOCK TIME
-	if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start) != 0)
+	if (clock_gettime(CLOCK_MONOTONIC, &start) != 0)
 	{
 		fprintf(stderr, "ERROR: clock_gettime start time\n");
 		returnStatus = 1;
@@ -160,7 +165,7 @@ int main(int argc, char** argv)
 			return returnStatus;	
 		}
 	}
-	if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end) != 0)
+	if (clock_gettime(CLOCK_MONOTONIC, &end) != 0)
 	{
 		fprintf(stderr, "ERROR: clock_gettime end time\n");
 		exit(1);

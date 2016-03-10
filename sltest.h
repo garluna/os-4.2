@@ -26,6 +26,8 @@ extern SortedList_t *head; // Head of list
 extern int num_elements;
 extern SortedListElement_t** elem_array; // Pointer to SortedListElement* array 
 
+extern pthread_mutex_t lock_m;
+
 // SUBLISTS 
 typedef struct sublist
 {
