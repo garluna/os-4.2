@@ -18,10 +18,17 @@ int use_spinlock; // Default 0 (false)
 int insert_yield; // Default 0 (false)
 int delete_yield; // Default 0 (false)
 int search_yield; // Default 0 (false)
+
 SortedList_t *head;
 SortedListElement_t** elem_array;
+
 int num_elements;
 pthread_t* threads;
+
+sublist_t* sublists; 
+
+pthread_mutex_t* mutexes;
+int* volatile locks; 
 
 int main(int argc, char** argv)
 {
@@ -41,33 +48,34 @@ int main(int argc, char** argv)
 	returnStatus = parse(argc,argv);
 	if (returnStatus != 0)
 		return returnStatus;
+
+	// Create elem_array
+	num_elements = num_threads*num_iterations; 
+	elem_array = malloc((num_elements)*sizeof(SortedListElement_t*));
+	if(elem_array == NULL)
+	{
+		returnStatus = 1;
+		fprintf(stderr,"ERROR: Unable to malloc the SortedListElement_t array");
+		return returnStatus;
+	}
+	// Initialize elements in elem_array
+
+	for(i = 0; i < num_elements; i++)
+	{
+		elem_array[i] = initialize_element(elem_array[i]);
+		if(elem_array[i] == NULL)
+		{
+			fprintf(stderr, "ERROR: Unable to initialize element %i \n",i);
+			returnStatus = 1;
+			return returnStatus;
+		}
+	}
 	
 	if(num_lists == 1)
 	{
 		// Initialize empty list
 		head = initialize_list(head);
 
-		// Create elem_array
-		num_elements = num_threads*num_iterations; 
-		elem_array = malloc((num_elements)*sizeof(SortedListElement_t*));
-		if(elem_array == NULL)
-		{
-			returnStatus = 1;
-			fprintf(stderr,"ERROR: Unable to malloc the SortedListElement_t array");
-			return returnStatus;
-		}
-		// Initialize elements in elem_array
-
-		for(i = 0; i < num_elements; i++)
-		{
-			elem_array[i] = initialize_element(elem_array[i]);
-			if(elem_array[i] == NULL)
-			{
-				fprintf(stderr, "ERROR: Unable to initialize element %i \n",i);
-				returnStatus = 1;
-				return returnStatus;
-			}
-		}
 
 		// BEGIN CLOCK TIME
 		if (clock_gettime(CLOCK_MONOTONIC, &start) != 0)
@@ -129,7 +137,43 @@ int main(int argc, char** argv)
 		printf("elapsed time: %lld ns\n", totalTime);
 		printf("per operation: %i ns \n", totalTime/total_operations);
 	}
+	else if (num_lists > 1)
+	{
+		// Initialize sublists 
+		int j; // iterator 
+		int elem_index;
+		sublists = (sublist_t*) malloc(sizeof(sublist_t)*num_lists);
+		mutexes = (pthread_mutex_t*) malloc(sizeof(pthread_mutex_t)*num_lists);
+		locks = (int*) malloc(sizeof(int)*num_lists);
 
+		if(sublists == NULL || mutexes == NULL || locks == NULL)
+		{
+			fprintf(stderr, "ERROR: Unable to malloc \n");
+			returnStatus = 1;
+			return returnStatus; 
+		}
+
+		// Initialize head and locks for each sublist
+		for(j = 0; j<num_lists; j++)
+		{
+			sublists[j].sub_head = initialize_list(sublists[j].sub_head);
+			pthread_mutex_init(&mutexes[j], NULL);
+			locks[j] = 0;
+			sublists[j].lock_index = j; 
+		}
+
+		// Assign each element to a sublist 
+		for (j = 0; j < num_elements; j++)
+		{
+			elem_index = hash_key(elem_array[j]->key);
+			
+		}
+
+	}
+	else // NEG. LISTS
+	{
+		fprintf(stderr, "ERROR: Can't have a negative number of sublists! \n");
+	}
 	/*
 	int size = SortedList_length(head); // SANITY CHECK
 	printf("The size of the initialized list is %i \n", size);

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <string.h>
 
 #include "sltest.h"
 #include "SortedList.h"
@@ -15,6 +16,7 @@ SortedList_t* initialize_list(SortedList_t* head_t)
 
 	head_t->prev = head_t;
 	head_t->next = head_t;
+	// Change back to null 
 	char* a = "head";
 	head_t->key = a;
 
@@ -25,11 +27,28 @@ char* generate_key()
 {
 	int rand_key = rand() % 10000000 + 1; // Range: 1 to 10,0000,000
 
-	char* s_key = malloc(9*sizeof(char));
-	if(snprintf(s_key,9,"%i",rand_key) <= -1 || s_key == NULL)
+	char* s_key = malloc(10*sizeof(char));
+	if(snprintf(s_key,10,"%i",rand_key) <= -1 || s_key == NULL)
 		return NULL; 
 
 	return s_key;
+}
+
+unsigned long hash_key(const char* key)
+{
+	/*
+	int key_len = strlen(key);
+	int i;
+	int sum;
+
+	for(i = 0; i < key_len; i++)
+	{
+		sum += key[i];
+	}
+
+	return sum % num_lists; 
+	*/ 
+
 }
 
 SortedListElement_t* initialize_element(SortedListElement_t* element)
@@ -71,8 +90,6 @@ void* list_func(void* index)
 	for(i = 0; i < num_iterations; i++)
 	{
 		ret_elem = SortedList_lookup(head, keys[i]);
-	
-	
 	
 		if(ret_elem == NULL)
 			fprintf(stderr, "ERROR: A thread failed to find an element it inserted \n");

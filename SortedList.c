@@ -18,9 +18,14 @@ int use_spinlock; // Default 0 (false)
 
 int opt_yield = 0;
 
-// LOCKS
+// LOCKS FOR SINGLE LIST
 static pthread_mutex_t lock_m; // mutex lock
 volatile static int lock_s; // spin lock 
+
+// LOCKS FOR SUBLIST
+pthread_mutex_t* mutexes;
+int* volatile locks; 
+
 /*
  * SortedList (and SortedListElement)
  *
@@ -52,9 +57,14 @@ volatile static int lock_s; // spin lock
  	SortedListElement_t *p = list; // Initialized at list head
  	SortedListElement_t *n = list->next; // The first element
  	
+ 	if (!list || !element || !p || !n)
+ 		return;
+
  	// Find the right position to insert the swipe 
  	while(n != list)
  	{
+ 		if(!n)
+ 			return;
  		if (strcmp(element->key, n->key) <= 0)
  			break;
 
@@ -91,22 +101,15 @@ volatile static int lock_s; // spin lock
 
  SortedListElement_t* SortedList_lookup(SortedList_t *list, const char *key)
  {
+ 	if (!list || !key || !list->next)
+ 		return NULL;
 
- 	/*
- 	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
- 		pthread_mutex_lock(&lock_m);
-
- 	if(!use_mutex && use_spinlock)
- 	{
- 		while(__sync_lock_test_and_set(&lock_s, 1))
-		{
-			continue;
-		}
- 	}
- 	*/
  	SortedListElement_t *iter = list->next; // Initialized at first element
  	while(iter != list)
  	{
+ 		if (!iter)
+ 			return NULL; 
+
  		if (search_yield)
  			opt_yield = SEARCH_YIELD;
  		if (opt_yield & SEARCH_YIELD)
@@ -116,15 +119,7 @@ volatile static int lock_s; // spin lock
 
  		iter = iter->next;
  	}
- 	/*
- 	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
- 		pthread_mutex_unlock(&lock_m);
 
-  	if(!use_mutex && use_spinlock)
- 	{
-		__sync_lock_release(&lock_s);
- 	}
- 	*/
  	return NULL; // Unable to find element 
  }
 
@@ -140,6 +135,10 @@ volatile static int lock_s; // spin lock
 			continue;
 		}
  	}
+
+ 	// check for NULL pointers
+ 	if(!element || !element->next || !element->prev)
+ 		return 1;
 
  	SortedListElement_t *p = element->prev;
  	SortedListElement_t *n = element->next;
@@ -173,11 +172,17 @@ volatile static int lock_s; // spin lock
  int SortedList_length(SortedList_t *list)
  {
  	int counter = 0;
+
+ 	if(!list || !list->next || !list->prev)
+ 		return -1;
+
  	SortedListElement_t *p = list;
  	SortedListElement_t *n = list->next;
 
  	while (n != list)
  	{
+ 		if(!n)
+ 			return -1;
  		// Check for pointer corruption 
  		if (n->prev != p)
  			return -1; 
