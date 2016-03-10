@@ -22,9 +22,9 @@ static char* mutex_key = "m";
 static char* spinlock_key = "s";
 
 // SORTED LIST
-extern SortedList_t *head; // Head of list
+extern SortedList_t* head; // Head of list
 extern int num_elements;
-extern SortedListElement_t** elem_array; // Pointer to SortedListElement* array 
+extern SortedListElement_t* elem_array; // Pointer to SortedListElement* array 
 
 extern pthread_mutex_t lock_m;
 
@@ -42,10 +42,14 @@ extern pthread_mutex_t* mutexes;
 extern int* volatile locks; 
 
 SortedList_t* initialize_list(SortedList_t* head);
-SortedListElement_t* initialize_element(SortedListElement_t* element);
+void initialize_element(SortedListElement_t* element);
 char* generate_key();
 void terminate();
 void* list_func(void* iter);
 void* sublist_func(void* index);
 int hash_key(const char* key);
+void acquire_mutex(sublist_t* list);
+void release_mutex(sublist_t* list);
+void acquire_lock(sublist_t* list);
+void release_lock(sublist_t*list);
 #endif

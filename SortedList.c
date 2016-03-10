@@ -15,12 +15,12 @@ int delete_yield; // Default 0 (false)
 int search_yield; // Default 0 (false)
 int use_mutex; // Default 0 (false)
 int use_spinlock; // Default 0 (false)
-
+int num_lists; 
 int opt_yield = 0;
 
 // LOCKS FOR SINGLE LIST
 pthread_mutex_t lock_m; // mutex lock
-volatile static int lock_s = 1; // spin lock 
+volatile static int lock_s; // spin lock 
 
 // LOCKS FOR SUBLIST
 pthread_mutex_t* mutexes;
@@ -41,17 +41,20 @@ int* volatile locks;
  void SortedList_insert(SortedList_t *list, SortedListElement_t *element)
  {
 
- 	if(use_mutex && !use_spinlock){
- 		printf("USE MUTEX \n");
- 		pthread_mutex_lock(&lock_m);
- 	}
-
- 	if(!use_mutex && use_spinlock)
+ 	if(num_lists == 1) // LOCKS FOR SINGLE LSIT
  	{
- 		while(__sync_lock_test_and_set(&lock_s, 1))
-		{
-			continue;
-		}
+ 		if(use_mutex && !use_spinlock) // MUTEX
+ 		{
+	 		pthread_mutex_lock(&lock_m);
+ 		}
+
+ 		if(!use_mutex && use_spinlock) // SPIN
+	 	{
+	 		while(__sync_lock_test_and_set(&lock_s, 1))
+			{
+				continue;
+			}
+	 	}
  	}
 
  	SortedListElement_t *p = list; // Initialized at list head
@@ -78,7 +81,6 @@ int* volatile locks;
  	if(insert_yield)
  		opt_yield = INSERT_YIELD;
  	if(opt_yield & INSERT_YIELD){
- 		printf("YIELDING! \n");
  		pthread_yield();
  	}
  	// Perform the insertion 
@@ -87,14 +89,16 @@ int* volatile locks;
  	p->next = element;
  	n->prev = element;
  	
- 	 if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
- 		pthread_mutex_unlock(&lock_m);
-
-	if(!use_mutex && use_spinlock)
+ 	if(num_lists == 1)
  	{
-		__sync_lock_release(&lock_s);
- 	}
+	 	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+	 		pthread_mutex_unlock(&lock_m);
 
+		if(!use_mutex && use_spinlock) // USE SPIN LOCK
+	 	{
+			__sync_lock_release(&lock_s);
+	 	}
+	}
 	
  }
 
@@ -125,16 +129,19 @@ int* volatile locks;
 
  int SortedList_delete(SortedListElement_t *element)
  {
-  	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
- 		pthread_mutex_lock(&lock_m);
-
- 	if(!use_mutex && use_spinlock)
+ 	if(num_lists == 1)
  	{
- 		while(__sync_lock_test_and_set(&lock_s, 1))
-		{
-			continue;
-		}
- 	}
+	  	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+	 		pthread_mutex_lock(&lock_m);
+
+	 	if(!use_mutex && use_spinlock)
+	 	{
+	 		while(__sync_lock_test_and_set(&lock_s, 1))
+			{
+				continue;
+			}
+	 	}
+	}
 
  	// check for NULL pointers
  	if(!element || !element->next || !element->prev)
@@ -158,13 +165,16 @@ int* volatile locks;
  	element->next = NULL;
  	element->prev = NULL;
 
-  	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
- 		pthread_mutex_unlock(&lock_m);
-
-  	if(!use_mutex && use_spinlock)
+ 	if (num_lists == 1)
  	{
-		__sync_lock_release(&lock_s);
- 	}
+	  	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+	 		pthread_mutex_unlock(&lock_m);
+
+	  	if(!use_mutex && use_spinlock)
+	 	{
+			__sync_lock_release(&lock_s);
+	 	}
+	}
 
  	return 0;
  }	

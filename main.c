@@ -20,7 +20,7 @@ int delete_yield; // Default 0 (false)
 int search_yield; // Default 0 (false)
 
 SortedList_t *head;
-SortedListElement_t** elem_array;
+SortedListElement_t* elem_array;
 
 int num_elements;
 pthread_t* threads;
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 
 	// Create elem_array
 	num_elements = num_threads*num_iterations; 
-	elem_array = malloc((num_elements)*sizeof(SortedListElement_t*));
+	elem_array = (SortedListElement_t*) malloc((num_elements)*sizeof(SortedListElement_t));
 	if(elem_array == NULL)
 	{
 		returnStatus = 1;
@@ -63,13 +63,7 @@ int main(int argc, char** argv)
 	// Initialize elements in elem_array
 	for(i = 0; i < num_elements; i++)
 	{
-		elem_array[i] = initialize_element(elem_array[i]);
-		if(elem_array[i] == NULL)
-		{
-			fprintf(stderr, "ERROR: Unable to initialize element %i \n",i);
-			returnStatus = 1;
-			return returnStatus;
-		}
+		initialize_element(&elem_array[i]);
 	}
 
 	// Initialize mutex lock
@@ -174,7 +168,7 @@ int main(int argc, char** argv)
 	startTime = (long long)(start.tv_sec*pow(10, 9) + start.tv_nsec);
 	endTime = (long long)(end.tv_sec*pow(10, 9) + end.tv_nsec);
 	totalTime = endTime - startTime;
-	int total_operations = num_iterations*num_threads*(num_iterations*3)*4;
+	int total_operations = num_iterations*num_threads*(num_iterations*3)*(4);
 
 
 	// Print Output:

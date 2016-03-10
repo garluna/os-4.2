@@ -36,19 +36,6 @@ char* generate_key()
 
 int hash_key(const char* key)
 {
-	/*
-	int key_len = strlen(key);
-	int i;
-	int sum;
-
-	for(i = 0; i < key_len; i++)
-	{
-		sum += key[i];
-	}
-
-	return sum % num_lists; 
-	*/ 
-
 	int hash = 0;
     int c;
 
@@ -59,20 +46,42 @@ int hash_key(const char* key)
 
 }
 
-SortedListElement_t* initialize_element(SortedListElement_t* element)
+void initialize_element(SortedListElement_t* element)
 {
-	element = (SortedListElement_t*) malloc(sizeof(SortedListElement_t)); 
+	//element = (SortedListElement_t*) malloc(sizeof(SortedListElement_t)); 
 	if (element == NULL)
-		return NULL;
+		exit(1);
 
 	element->prev = NULL;
 	element->next = NULL;
 	element->key = generate_key(); 
 	if(element->key == NULL)
-		return NULL;
-
-	return element;
+		exit(1);	
 }
+
+void acquire_mutex(sublist_t* list)
+{
+	pthread_mutex_lock(&mutexes[list->lock_index]);
+}
+
+void release_mutex(sublist_t* list)
+{
+	pthread_mutex_unlock(&mutexes[list->lock_index]);
+}
+
+void acquire_lock(sublist_t* list)
+{
+	while(__sync_lock_test_and_set(&locks[list->lock_index], 1))
+	{
+		continue;
+	}
+}
+
+void release_lock(sublist_t *list)
+{
+	__sync_lock_release(&locks[list->lock_index]);
+}
+
 
 void* list_func(void* index)
 {
@@ -88,8 +97,8 @@ void* list_func(void* index)
 	for(i = 0 ; elem_index <= end_index; elem_index++)
 	{
 	
-		SortedList_insert(head, elem_array[elem_index]);
-		keys[i] = elem_array[elem_index]->key; 
+		SortedList_insert(head, &elem_array[elem_index]);
+		keys[i] = elem_array[elem_index].key; 
 		i++;
 	}
 	
@@ -122,9 +131,19 @@ void* sublist_func(void* index)
 
 	for( ; elem_index <= end_index; elem_index++)
 	{
-		sublist_index = hash_key(elem_array[elem_index]->key);
-		SortedList_insert(sublists[sublist_index].sub_head, elem_array[elem_index]);
+		sublist_index = hash_key(elem_array[elem_index].key);
+		
+		if(use_mutex && !use_spinlock)
+			acquire_mutex(&sublists[sublist_index]);
+		if(!use_mutex && use_spinlock)
+			acquire_lock(&sublists[sublist_index]);
 
+		SortedList_insert(sublists[sublist_index].sub_head, &elem_array[elem_index]);
+
+		if(use_mutex && !use_spinlock)
+			release_mutex(&sublists[sublist_index]);
+		if(!use_mutex && use_spinlock)
+			release_lock(&sublists[sublist_index]);
 	}
 	
 	elem_index = end_index - num_iterations;
@@ -132,14 +151,24 @@ void* sublist_func(void* index)
 
 	for( ; elem_index <= end_index; elem_index++)
 	{
-		sublist_index = hash_key(elem_array[elem_index]->key);
-		ret_elem = SortedList_lookup(sublists[sublist_index].sub_head, elem_array[elem_index]->key);
+		sublist_index = hash_key(elem_array[elem_index].key);
+		ret_elem = SortedList_lookup(sublists[sublist_index].sub_head, elem_array[elem_index].key);
 		
 		if(ret_elem == NULL)
 			fprintf(stderr, "ERROR: A thread failed to find an element it inserted \n");
 		
+		if(use_mutex && !use_spinlock)
+			acquire_mutex(&sublists[sublist_index]);
+		if(!use_mutex && use_spinlock)
+			acquire_lock(&sublists[sublist_index]);
+
 		if(SortedList_delete(ret_elem) == 1) 
 			fprintf(stderr, "ERROR: Corrupted pointers in delete attempt \n");	
+
+		if(use_mutex && !use_spinlock)
+			release_mutex(&sublists[sublist_index]);
+		if(!use_mutex && use_spinlock)
+			release_lock(&sublists[sublist_index]);
 	}
 	
 	pthread_exit(NULL);
@@ -153,10 +182,7 @@ void terminate()
 	free(head);
 	for(i = 0; i < num_elements; i++)
 	{
-		if(elem_array[i] != NULL) {
-			free((void*)elem_array[i]->key);
-			free(elem_array[i]);
-		}
+		free((void*)elem_array[i].key);
 	}
 	free(elem_array);
 
