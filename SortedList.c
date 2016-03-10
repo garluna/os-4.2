@@ -41,6 +41,14 @@ volatile static int lock_s; // spin lock
  		pthread_mutex_lock(&lock_m);
  	}
 
+ 	if(!use_mutex && use_spinlock)
+ 	{
+ 		while(__sync_lock_test_and_set(&lock_s, 1))
+		{
+			continue;
+		}
+ 	}
+
  	SortedListElement_t *p = list; // Initialized at list head
  	SortedListElement_t *n = list->next; // The first element
  	
@@ -71,12 +79,31 @@ volatile static int lock_s; // spin lock
  	
  	 if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
  		pthread_mutex_unlock(&lock_m);
+
+	if(!use_mutex && use_spinlock)
+ 	{
+		__sync_lock_release(&lock_s);
+ 	}
+
 	
  }
 
 
  SortedListElement_t* SortedList_lookup(SortedList_t *list, const char *key)
  {
+
+ 	/*
+ 	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+ 		pthread_mutex_lock(&lock_m);
+
+ 	if(!use_mutex && use_spinlock)
+ 	{
+ 		while(__sync_lock_test_and_set(&lock_s, 1))
+		{
+			continue;
+		}
+ 	}
+ 	*/
  	SortedListElement_t *iter = list->next; // Initialized at first element
  	while(iter != list)
  	{
@@ -89,6 +116,15 @@ volatile static int lock_s; // spin lock
 
  		iter = iter->next;
  	}
+ 	/*
+ 	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+ 		pthread_mutex_unlock(&lock_m);
+
+  	if(!use_mutex && use_spinlock)
+ 	{
+		__sync_lock_release(&lock_s);
+ 	}
+ 	*/
  	return NULL; // Unable to find element 
  }
 
@@ -96,6 +132,14 @@ volatile static int lock_s; // spin lock
  {
   	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
  		pthread_mutex_lock(&lock_m);
+
+ 	if(!use_mutex && use_spinlock)
+ 	{
+ 		while(__sync_lock_test_and_set(&lock_s, 1))
+		{
+			continue;
+		}
+ 	}
 
  	SortedListElement_t *p = element->prev;
  	SortedListElement_t *n = element->next;
@@ -117,6 +161,11 @@ volatile static int lock_s; // spin lock
 
   	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
  		pthread_mutex_unlock(&lock_m);
+
+  	if(!use_mutex && use_spinlock)
+ 	{
+		__sync_lock_release(&lock_s);
+ 	}
 
  	return 0;
  }	
