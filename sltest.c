@@ -7,19 +7,17 @@
 #include "SortedList.h"
 
 
-SortedList_t* initialize_list(SortedList_t* head_t)
+void initialize_list(SortedList_t* head_t)
 {
-	head_t = (SortedList_t*) malloc(sizeof(SortedList_t));
 	if (head_t == NULL)
-		return NULL; 
-
+		return;
+	if(num_lists == 1){
+		head_t->prev = &head;
+		head_t->next = &head;
+	}
 	head_t->prev = head_t;
-	head_t->next = head_t;
-	// Change back to null 
-	char* a = "head";
-	head_t->key = a;
-
-	return head_t;
+	head_t->next = head_t; 
+	head_t->key = NULL;
 }
 
 char* generate_key()
@@ -95,8 +93,7 @@ void* list_func(void* index)
 
 	for(i = 0 ; elem_index <= end_index; elem_index++)
 	{
-	
-		SortedList_insert(head, &elem_array[elem_index]);
+		SortedList_insert(&head, &elem_array[elem_index]);
 		keys[i] = elem_array[elem_index].key; 
 		i++;
 	}
@@ -105,13 +102,8 @@ void* list_func(void* index)
 	// Find each inserted element, then delete it
 	for(i = 0; i < num_iterations; i++)
 	{
-		ret_elem = SortedList_lookup(head, keys[i]);
-	
-		if(ret_elem == NULL)
-			fprintf(stderr, "ERROR: A thread failed to find an element it inserted \n");
-		
-		if(SortedList_delete(ret_elem) == 1) 
-			fprintf(stderr, "ERROR: Corrupted pointers in delete attempt \n");	
+		ret_elem = SortedList_lookup(&head, keys[i]);
+		SortedList_delete(ret_elem);
 	}
 
 	pthread_exit(NULL);
@@ -132,16 +124,16 @@ void* sublist_func(void* index)
 	{
 		sublist_index = hash_key(elem_array[elem_index].key);
 		
-		if(use_mutex && !use_spinlock)
+		if(use_mutex)
 			acquire_mutex(&sublists[sublist_index]);
-		if(!use_mutex && use_spinlock)
+		if(use_spinlock)
 			acquire_lock(&sublists[sublist_index]);
 
-		SortedList_insert(sublists[sublist_index].sub_head, &elem_array[elem_index]);
+		SortedList_insert(&sublists[sublist_index].sub_head, &elem_array[elem_index]);
 
-		if(use_mutex && !use_spinlock)
+		if(use_mutex)
 			release_mutex(&sublists[sublist_index]);
-		if(!use_mutex && use_spinlock)
+		if(use_spinlock)
 			release_lock(&sublists[sublist_index]);
 	}
 	
@@ -151,22 +143,26 @@ void* sublist_func(void* index)
 	for( ; elem_index <= end_index; elem_index++)
 	{
 		sublist_index = hash_key(elem_array[elem_index].key);
-		ret_elem = SortedList_lookup(sublists[sublist_index].sub_head, elem_array[elem_index].key);
+		ret_elem = SortedList_lookup(&sublists[sublist_index].sub_head, elem_array[elem_index].key);
 		
-		if(ret_elem == NULL)
-			fprintf(stderr, "ERROR: A thread failed to find an element it inserted \n");
+		if(ret_elem == NULL){
+			break;
+			// fprintf(stderr, "ERROR: A thread failed to find an element it inserted \n");
+		}
 		
-		if(use_mutex && !use_spinlock)
+		if(use_mutex)
 			acquire_mutex(&sublists[sublist_index]);
-		if(!use_mutex && use_spinlock)
+		if(use_spinlock)
 			acquire_lock(&sublists[sublist_index]);
 
-		if(SortedList_delete(ret_elem) == 1) 
-			fprintf(stderr, "ERROR: Corrupted pointers in delete attempt \n");	
+		if(SortedList_delete(ret_elem) == 1){
+			break;
+			//fprintf(stderr, "ERROR: Corrupted pointers in delete attempt \n");	
+		}
 
-		if(use_mutex && !use_spinlock)
+		if(use_mutex)
 			release_mutex(&sublists[sublist_index]);
-		if(!use_mutex && use_spinlock)
+		if(use_spinlock)
 			release_lock(&sublists[sublist_index]);
 	}
 	
@@ -179,7 +175,7 @@ int SortedList_length_of_all_sublists()
 	int total = 0;
 	for(i = 0; i < num_lists; i++)
 	{
-		total += SortedList_length(sublists[i].sub_head);	
+		total += SortedList_length(&sublists[i].sub_head);	
 	}
 	return total; 
 }
@@ -188,16 +184,11 @@ int SortedList_length_of_all_sublists()
 void terminate()
 {
 	int i;
-	free(head);
 	for(i = 0; i < num_elements; i++)
 	{
 		free((void*)elem_array[i].key);
 	}
 	free(elem_array);
 
-	if(num_lists > 1)
-	{
-		
-	}
 
 }

@@ -20,7 +20,7 @@ int opt_yield = 0;
 
 // LOCKS FOR SINGLE LIST
 pthread_mutex_t lock_m; // mutex lock
-volatile static int lock_s; // spin lock 
+volatile int lock_s = 0; // spin lock 
 
 // LOCKS FOR SUBLIST
 pthread_mutex_t* mutexes;
@@ -43,12 +43,12 @@ int* volatile locks;
 
  	if(num_lists == 1) // LOCKS FOR SINGLE LSIT
  	{
- 		if(use_mutex && !use_spinlock) // MUTEX
+ 		if(use_mutex) // MUTEX
  		{
 	 		pthread_mutex_lock(&lock_m);
  		}
 
- 		if(!use_mutex && use_spinlock) // SPIN
+ 		if(use_spinlock) // SPIN
 	 	{
 	 		while(__sync_lock_test_and_set(&lock_s, 1))
 			{
@@ -66,8 +66,21 @@ int* volatile locks;
  	// Find the right position to insert the swipe 
  	while(n != list)
  	{
- 		if(!n)
+ 		if(!n){
+	 		if(num_lists == 1) // LOCKS FOR SINGLE LSIT
+	 		{
+		 		if(use_mutex) // MUTEX
+		 		{
+			 		pthread_mutex_unlock(&lock_m);
+		 		}
+
+		 		if(use_spinlock) // SPIN
+			 	{
+					__sync_lock_release(&lock_s);
+			 	}
+ 			}
  			return;
+ 		}
  		if (strcmp(element->key, n->key) <= 0)
  			break;
 
@@ -78,8 +91,9 @@ int* volatile locks;
  	}
  	
  	// OPT_YIELD
- 	if(insert_yield)
+ 	if(insert_yield){
  		opt_yield = INSERT_YIELD;
+ 	}
  	if(opt_yield & INSERT_YIELD){
  		pthread_yield();
  	}
@@ -91,10 +105,10 @@ int* volatile locks;
  	
  	if(num_lists == 1)
  	{
-	 	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+	 	if(use_mutex) // ONLY USE MUTEX LOCK
 	 		pthread_mutex_unlock(&lock_m);
 
-		if(!use_mutex && use_spinlock) // USE SPIN LOCK
+		if(use_spinlock) // USE SPIN LOCK
 	 	{
 			__sync_lock_release(&lock_s);
 	 	}
@@ -106,13 +120,19 @@ int* volatile locks;
  SortedListElement_t* SortedList_lookup(SortedList_t *list, const char *key)
  {
  	if (!list || !key || !list->next)
+ 	{
+ 		printf("[lookup] Pointer value in lookup (passed in list) is %p \n", list);
  		return NULL;
+ 	}
 
  	SortedListElement_t *iter = list->next; // Initialized at first element
  	while(iter != list)
  	{
  		if (!iter)
+ 		{
+ 			printf("[lookup] Pointer value in lookup (iter) is %p \n", iter);
  			return NULL; 
+ 		}
 
  		if (search_yield)
  			opt_yield = SEARCH_YIELD;
@@ -131,10 +151,10 @@ int* volatile locks;
  {
  	if(num_lists == 1)
  	{
-	  	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+	  	if(use_mutex) // ONLY USE MUTEX LOCK
 	 		pthread_mutex_lock(&lock_m);
 
-	 	if(!use_mutex && use_spinlock)
+	 	if(use_spinlock)
 	 	{
 	 		while(__sync_lock_test_and_set(&lock_s, 1))
 			{
@@ -145,13 +165,39 @@ int* volatile locks;
 
  	// check for NULL pointers
  	if(!element || !element->next || !element->prev)
+ 	{
+	 	if (num_lists == 1)
+	 	{
+		  	if(use_mutex) // ONLY USE MUTEX LOCK
+		 		pthread_mutex_unlock(&lock_m);
+
+		  	if(use_spinlock)
+		 	{
+				__sync_lock_release(&lock_s);
+		 	}
+		}
+	 	// printf("[delete] Pointer value in delete (passed in element) is %p \n", element);
  		return 1;
+ 	}
 
  	SortedListElement_t *p = element->prev;
  	SortedListElement_t *n = element->next;
 
  	if(p->next != element || n->prev != element)
+ 	{
+	  	if (num_lists == 1)
+	 	{
+		  	if(use_mutex) // ONLY USE MUTEX LOCK
+		 		pthread_mutex_unlock(&lock_m);
+
+		  	if(use_spinlock)
+		 	{
+				__sync_lock_release(&lock_s);
+		 	}
+		}
+ 		// printf("[delete] Pointer value in delete for p is: %p and n is: %p \n",p, n);
  		return 1;
+ 	}
 
  	n->prev = p; 
  	p->next = n; 
@@ -167,10 +213,10 @@ int* volatile locks;
 
  	if (num_lists == 1)
  	{
-	  	if(use_mutex && !use_spinlock) // ONLY USE MUTEX LOCK
+	  	if(use_mutex) // ONLY USE MUTEX LOCK
 	 		pthread_mutex_unlock(&lock_m);
 
-	  	if(!use_mutex && use_spinlock)
+	  	if(use_spinlock)
 	 	{
 			__sync_lock_release(&lock_s);
 	 	}
@@ -184,20 +230,21 @@ int* volatile locks;
  	int counter = 0;
 
  	if(!list || !list->next || !list->prev)
+ 	{
+ 		// printf("[length] Pointer value for passed in list in length is %p \n", list);
  		return -1;
+ 	}
 
  	SortedListElement_t *p = list;
  	SortedListElement_t *n = list->next;
 
  	while (n != list)
  	{
- 		if(!n)
+ 		if(!n || n->prev != p || p->next != n )
+ 		{
+ 			// printf("[length] Pointer value in length is %p \n", n);
  			return -1;
- 		// Check for pointer corruption 
- 		if (n->prev != p)
- 			return -1; 
- 		if (p->next != n)
- 			return -1; 
+ 		}
 
  		// OPT_YIELD
  		if(search_yield)

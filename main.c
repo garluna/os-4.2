@@ -3,6 +3,7 @@
 #include <math.h>
 #include <time.h>
 #include <pthread.h>
+#include <stdint.h>
 
 
 #include "SortedList.h"
@@ -19,7 +20,7 @@ int insert_yield; // Default 0 (false)
 int delete_yield; // Default 0 (false)
 int search_yield; // Default 0 (false)
 
-SortedList_t *head;
+SortedList_t head;
 SortedListElement_t* elem_array;
 
 int num_elements;
@@ -71,7 +72,7 @@ int main(int argc, char** argv)
 		pthread_mutex_init(&lock_m, NULL);
 	
 	// Create threads 
-	threads = malloc(num_threads*sizeof(pthread_t));
+	threads = (pthread_t*) malloc(num_threads*sizeof(pthread_t));
 	if(threads == NULL)
 	{
 		returnStatus = 1;
@@ -80,8 +81,7 @@ int main(int argc, char** argv)
 	}
 
 	// Initialize empty list
-	head = initialize_list(head);
-
+	initialize_list(&head);
 
 	// BEGIN CLOCK TIME
 	if (clock_gettime(CLOCK_MONOTONIC, &start) != 0)
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 		for(i = 0; i < num_threads; i++)
 		{
 			end_index += num_iterations;
-			if (pthread_create(&threads[i], NULL, (void*) list_func, (void*)end_index) != 0)
+			if (pthread_create(&threads[i], NULL,list_func, (void*) end_index) != 0)
 			{
 				returnStatus = 1;
 				fprintf(stderr, "ERROR: Unable to create a thread \n");
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
 		// Initialize head and locks for each sublist
 		for(j = 0; j<num_lists; j++)
 		{
-			sublists[j].sub_head = initialize_list(sublists[j].sub_head);
+			initialize_list(&sublists[j].sub_head);
 			pthread_mutex_init(&mutexes[j], NULL);
 			locks[j] = 0;
 			sublists[j].lock_index = j; 
@@ -137,7 +137,7 @@ int main(int argc, char** argv)
 		for(i = 0; i < num_threads; i++)
 		{
 			end_index += num_iterations;
-			if (pthread_create(&threads[i], NULL, (void*) sublist_func, (void*) end_index) != 0)
+			if (pthread_create(&threads[i], NULL, sublist_func, (void*) end_index) != 0)
 			{
 				returnStatus = 1;
 				fprintf(stderr, "ERROR: Unable to create a thread \n");
@@ -172,13 +172,13 @@ int main(int argc, char** argv)
 	startTime = (long long)(start.tv_sec*pow(10, 9) + start.tv_nsec);
 	endTime = (long long)(end.tv_sec*pow(10, 9) + end.tv_nsec);
 	totalTime = endTime - startTime;
-	int total_operations = num_iterations*num_threads*(num_iterations*3)*(4);
+	int total_operations = num_iterations*num_threads*(3)*(4);
 
 
 	// Print Output:
 	if (num_lists == 1)
 	{
-		size = SortedList_length(head);
+		size = SortedList_length(&head);
 		if(size != 0)
 			fprintf(stderr, "ERROR:The size of list is %i \n", size);
 	}
