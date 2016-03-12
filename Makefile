@@ -18,7 +18,7 @@ check:
 dist: lab4-Part2-GarimaLunawatBreannaNery.tar.gz
 lab4-Part2-GarimaLunawatBreannaNery.tar.gz: $(SOURCES)
 	mkdir lab4-Part2-GarimaLunawatBreannaNery
-	cp $(SOURCES) lab-Part2-GarimaLunawatBreannaNery
+	cp $(SOURCES) lab4-Part2-GarimaLunawatBreannaNery
 	tar -czf $@ lab4-Part2-GarimaLunawatBreannaNery
 	rm -r lab4-Part2-GarimaLunawatBreannaNery
 
