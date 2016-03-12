@@ -121,7 +121,7 @@ int* volatile locks;
  {
  	if (!list || !key || !list->next)
  	{
- 		printf("[lookup] Pointer value in lookup (passed in list) is %p \n", list);
+ 		//printf("[lookup] Pointer value in lookup (passed in list) is %p \n", list);
  		return NULL;
  	}
 
@@ -130,7 +130,7 @@ int* volatile locks;
  	{
  		if (!iter)
  		{
- 			printf("[lookup] Pointer value in lookup (iter) is %p \n", iter);
+ 			//printf("[lookup] Pointer value in lookup (iter) is %p \n", iter);
  			return NULL; 
  		}
 
