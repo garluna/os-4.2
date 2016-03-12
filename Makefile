@@ -1,4 +1,4 @@
-OPTIMIZE=-O0
+OPTIMIZE=-O2
 CC = gcc
 CFLAGS = $(OPTIMIZE) -g3 -std=gnu11 -lrt  -pthread 
 DEPS = sltest.h SortedList.h parser.h
@@ -15,14 +15,14 @@ sltest: $(OBJ)
 check:
 	
 
-dist: lab4.2-GarimaLunawatBreannaNery.tar.gz
+dist: lab4-Part2-GarimaLunawatBreannaNery.tar.gz
 lab4.2-GarimaLunawatBreannaNery.tar.gz: $(SOURCES)
-	mkdir lab4.2-GarimaLunawatBreannaNery
-	cp $(SOURCES) lab4.2-GarimaLunawatBreannaNery
-	tar -czf $@ lab4.2-GarimaLunawatBreannaNery
-	rm -r lab4.2-GarimaLunawatBreannaNery
+	mkdir lab4-Part2-GarimaLunawatBreannaNery
+	cp $(SOURCES) lab-Part2-GarimaLunawatBreannaNery
+	tar -czf $@ lab4-Part2-GarimaLunawatBreannaNery
+	rm -r lab4-Part2-GarimaLunawatBreannaNery
 
 clean:
-	rm -f *.o *.so *.so.* sltest lab4.2-GarimaLunawatBreannaNery.tar.gz lab4.2-GarimaLunawatBreannaNery
+	rm -f *.o *.so *.so.* sltest lab4-Part2-GarimaLunawatBreannaNery.tar.gz lab4-Part2-GarimaLunawatBreannaNery
 
 
