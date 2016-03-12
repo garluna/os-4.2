@@ -23,6 +23,6 @@ lab4-Part2-GarimaLunawatBreannaNery.tar.gz: $(SOURCES)
 	rm -r lab4-Part2-GarimaLunawatBreannaNery
 
 clean:
-	rm -f *.o *.so *.so.* sltest lab4-Part2-GarimaLunawatBreannaNery.tar.gz lab4-Part2-GarimaLunawatBreannaNery
+	rm -rf *.o *.so *.so.* sltest lab4-Part2-GarimaLunawatBreannaNery.tar.gz lab4-Part2-GarimaLunawatBreannaNery
 
 
